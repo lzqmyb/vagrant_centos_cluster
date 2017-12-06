@@ -6,8 +6,9 @@ $os_image = (ENV['OS_IMAGE'] || "centos7").to_sym
 Vagrant.configure("2") do |config|
 
   config.vm.provider "virtualbox"
-  config.vm.synced_folder "ssh", "/home/vagrant/.ssh"
+#  config.vm.synced_folder "ssh", "/home/vagrant/.ssh"
   config.vm.synced_folder "softs", "/home/vagrant/softs"
+  config.vm.synced_folder "pki", "/home/vagrant/pki"
   config.vm.provision "shell", path: "provision-1-init.sh"
   master = 1
   node = 2
