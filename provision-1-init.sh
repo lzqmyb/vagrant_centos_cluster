@@ -1,6 +1,5 @@
 #! /bin/bash
 
-
 # # vi /etc/selinux/config
 # SELINUX=permissive
 
@@ -23,7 +22,8 @@ EOF
 
 yum clean all
 yum makecache
-yum install -y kubernetes-1.8.1-1.el7.x86_64 
+
+yum install docker -y
 
 # 设置docker
 
@@ -41,9 +41,3 @@ net.bridge.bridge-nf-call-iptables = 1
 EOF
 
 sysctl -p /etc/sysctl.d/k8s.conf
-
-# 在master1需要安装CFSSL工具，这将会用来建立 TLS certificates。
-export CFSSL_URL="https://pkg.cfssl.org/R1.2"
-wget "${CFSSL_URL}/cfssl_linux-amd64" -O /usr/local/bin/cfssl
-wget "${CFSSL_URL}/cfssljson_linux-amd64" -O /usr/local/bin/cfssljson
-chmod +x /usr/local/bin/cfssl /usr/local/bin/cfssljson

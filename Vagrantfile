@@ -9,13 +9,16 @@ Vagrant.configure("2") do |config|
 #  config.vm.synced_folder "ssh", "/home/vagrant/.ssh"
   config.vm.synced_folder "softs", "/home/vagrant/softs"
   config.vm.synced_folder "pki", "/home/vagrant/pki"
+  config.vm.synced_folder "service", "/home/vagrant/service"
+  config.vm.synced_folder "cni", "/home/vagrant/cni"
+  config.vm.synced_folder "yml.conf", "/home/vagrant/yml.conf"
   config.vm.provision "shell", path: "provision-1-init.sh"
   master = 1
   node = 2
   # Set virtualbox func
   def set_vbox(vb, config, memory)
     vb.gui = false
-    vb.memory = memory 
+    vb.memory = memory
     vb.cpus = 2
 
     case $os_image
