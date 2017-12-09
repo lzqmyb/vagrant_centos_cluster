@@ -3,7 +3,10 @@
 # 在master1需要安装CFSSL工具，这将会用来建立 TLS certificates。
 export CFSSL_URL="https://pkg.cfssl.org/R1.2"
 wget "${CFSSL_URL}/cfssl_linux-amd64" -O /usr/local/bin/cfssl
+wget "${CFSSL_URL}/cfssljson_linux-amd64" -O /usr/local/bin/cfssljson
 chmod +x /usr/local/bin/cfssl /usr/local/bin/cfssljson
+link /usr/local/bin/cfssl /usr/bin/cfssl
+link /usr/local/bin/cfssljson /usr/bin/cfssljson
 
 # Etcd
 # 在开始安装 Kubernetes 之前，需要先将一些必要系统创建完成，其中 Etcd 就是 Kubernetes 最重要的一环，Kubernetes 会将大部分信息储存于 Etcd 上，来提供给其他节点索取，以确保整个集群运作与沟通正常。
@@ -65,8 +68,10 @@ link  /usr/bin/kubelet /usr/local/bin/kubelet
 
 # Download CNI
 mkdir -p /opt/cni/bin && cd /opt/cni/bin
-cp /home/vagrant/cni/cni-plugins-amd64-v0.6.0.tgz .
-tar -zx cni-plugins-amd64-v0.6.0.tgz
+# cp /home/vagrant/cni/cni-plugins-amd64-v0.6.0.tgz .
+export CNI_URL="https://github.com/containernetworking/plugins/releases/download"
+wget -qO- "${CNI_URL}/v0.6.0/cni-plugins-amd64-v0.6.0.tgz" | tar -zx
+# tar -zx cni-plugins-amd64-v0.6.0.tgz
 
 
 # 创建pki文件夹，然后进入目录完成以下操作。
@@ -76,8 +81,8 @@ export KUBE_APISERVER="https://172.1.1.12:6443"
 
 
 # 下载ca-config.json与ca-csr.json文件，并生成 CA 密钥：
-cp ${PKI_URL}/ca-config.json
-cp ${PKI_URL}/ca-csr.json
+cp ${PKI_URL}/ca-config.json .
+cp ${PKI_URL}/ca-csr.json .
 cfssl gencert -initca ca-csr.json | cfssljson -bare ca
 ls ca*.pem
 
@@ -85,7 +90,7 @@ ls ca*.pem
 # API server certificate
 
 #  下载apiserver-csr.json文件，并生成 kube-apiserver certificate 证书：
-cp ${PKI_URL}/apiserver-csr.json
+cp ${PKI_URL}/apiserver-csr.json .
 cfssl gencert \
   -ca=ca.pem \
   -ca-key=ca-key.pem \
@@ -100,14 +105,14 @@ ls apiserver*.pem
 
 # 下载front-proxy-ca-csr.json文件，并生成 Front proxy CA 密钥，Front proxy 主要是用在 API aggregator 上:
 
-cp ${PKI_URL}/front-proxy-ca-csr.json
+cp ${PKI_URL}/front-proxy-ca-csr.json .
 cfssl gencert \
   -initca front-proxy-ca-csr.json | cfssljson -bare front-proxy-ca
 
 ls front-proxy-ca*.pem
 
 # 下载front-proxy-client-csr.json文件，并生成 front-proxy-client 证书：
-cp ${PKI_URL}/front-proxy-client-csr.json
+cp ${PKI_URL}/front-proxy-client-csr.json .
 cfssl gencert \
   -ca=front-proxy-ca.pem \
   -ca-key=front-proxy-ca-key.pem \
@@ -161,7 +166,7 @@ kubectl config use-context default --kubeconfig=../bootstrap.conf
 #
 # 下载admin-csr.json文件，并生成 admin certificate 证书：
 
-cp ${PKI_URL}/admin-csr.json
+cp ${PKI_URL}/admin-csr.json .
 cfssl gencert \
   -ca=ca.pem \
   -ca-key=ca-key.pem \
@@ -201,7 +206,7 @@ kubectl config use-context kubernetes-admin@kubernetes \
 
 # 下载manager-csr.json文件，并生成 kube-controller-manager certificate 证书：
 
-cp ${PKI_URL}/manager-csr.json
+cp ${PKI_URL}/manager-csr.json .
 cfssl gencert \
   -ca=ca.pem \
   -ca-key=ca-key.pem \
@@ -240,7 +245,7 @@ kubectl config use-context system:kube-controller-manager@kubernetes \
 # Scheduler certificate
 
 # 下载scheduler-csr.json文件，并生成 kube-scheduler certificate 证书：
-cp ${PKI_URL}/scheduler-csr.json
+cp ${PKI_URL}/scheduler-csr.json .
 cfssl gencert \
   -ca=ca.pem \
   -ca-key=ca-key.pem \
@@ -277,7 +282,7 @@ kubectl config use-context system:kube-scheduler@kubernetes \
 #  Kubelet master certificate
 
 #  下载kubelet-csr.json文件，并生成 master node certificate 证书：
-cp ${PKI_URL}/kubelet-csr.json
+cp ${PKI_URL}/kubelet-csr.json .
 sed -i 's/$NODE/master1/g' kubelet-csr.json
 cfssl gencert \
   -ca=ca.pem \
